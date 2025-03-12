@@ -17,7 +17,7 @@ namespace backend.Models
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public required string Passwd { get; set; }
-        public required string Role { get; set; }
+        public required bool isAdmin { get; set; }
 }
 
 }

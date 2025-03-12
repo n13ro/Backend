@@ -12,8 +12,8 @@ using backend.Database;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250312074420_uprdate-0.0.3")]
-    partial class uprdate003
+    [Migration("20250312184134_uprdate-0.0.1")]
+    partial class uprdate001
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,7 +65,8 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("admin")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

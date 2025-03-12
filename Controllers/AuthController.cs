@@ -44,7 +44,7 @@ namespace backend.Controllers
             {
                 Email = registerDto.Email,
                 Passwd = HashPasswd(registerDto.Password),
-                Role = "User"
+                isAdmin = false
             };
 
             _dbContext.Users.Add(user);
@@ -52,7 +52,6 @@ namespace backend.Controllers
 
             var token = _jwtService.GenerateToken(user);
             return new AuthResponseDto { Token = token };
-            //return Ok(new { mess = "User register" });
             }
 
         [HttpPost("login")]
