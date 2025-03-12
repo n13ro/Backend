@@ -1,0 +1,62 @@
+# Отключить автоматическое отслеживание файлов .NET, которые автоматически создаются в процессе сборки
+bin/
+obj/
+.idea/
+# Файлы журналов
+*.log
+
+# Файл конфигурации среды выполнения
+.runtimeconfig.json
+
+# Исполняемые файлы (для Windows)
+*.exe
+*.dll
+
+# Конфигурационные файлы Visual Studio
+.vs/
+
+# Конфигурация окружения Docker
+.dockerignore
+
+# Исключить файл артефактов публикации
+artifacts/
+
+# Публикационный профиль
+Properties/PublishProfiles/
+
+# Кэш NuGet
+packages/
+
+# Отчеты Coverlet
+coverage/
+
+# Каталог binaries Debug и Release
+bin/Debug/
+bin/Release/
+
+# Артефакты тестового покрытия
+TestResults/
+
+# Резервные копии и временные файлы VS
+*.suo
+*.cache
+*.tmp
+*.bak
+*.pdb
+
+# Локальные настройки пользователей
+.user
+.userosscache
+
+# Конкретный проект или конфигурационные файлы
+.project.lock.json
+.project.assets.json
+.project.nuget.cache
+.csproj.nuget.g.props
+.csproj.nuget.g.targets
+
+# Символические ссылки
+.gitattributes
+
+# Сборка веб-проектов (если есть)
+wwwroot/
