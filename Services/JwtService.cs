@@ -23,6 +23,7 @@ namespace Backend.Services
             var claims = new[]
             {
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
                 
             };
 

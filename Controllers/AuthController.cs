@@ -1,16 +1,10 @@
 ﻿
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using backend.Database;
 using backend.Models;
-using Backend.Enums;
 using Backend.Services;
-
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using static Backend.DTOs.AuthDto;
 
 namespace backend.Controllers
@@ -44,7 +38,6 @@ namespace backend.Controllers
             {
                 Email = registerDto.Email,
                 Passwd = HashPasswd(registerDto.Password),
-                isAdmin = false
             };
 
             _dbContext.Users.Add(user);

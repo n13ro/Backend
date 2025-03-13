@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Backend.Identity;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Backend.Swagger;
@@ -47,8 +46,9 @@ builder.Services.AddAuthentication(x =>
 
         };
     });
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(IdentityData.AdminUserPolicyName, p => p.RequireClaim(IdentityData.AdminUserClaimName, "true"));
+builder.Services.AddAuthorizationBuilder();
+//builder.Services.AddAuthorizationBuilder()
+//    .AddPolicy(IdentityData.AdminUserPolicyName, p => p.RequireClaim(IdentityData.AdminUserClaimName, "true"));
 
 var app = builder.Build();
 

@@ -2,19 +2,14 @@
 using backend.Database;
 using backend.Models;
 using Backend.DTOs;
-using Backend.Enums;
-using Backend.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 
 namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -57,7 +52,7 @@ namespace backend.Controllers
             return Ok(productResponse);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] ProdDto prodDto )
         {
@@ -87,8 +82,7 @@ namespace backend.Controllers
             }
         }
 
-        //[Authorize(Policy = IdentityData.AdminUserPolicyName)]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task DeleteProduct(Guid id)
         {
