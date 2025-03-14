@@ -18,6 +18,8 @@ namespace backend.Models
         [Display(Name = "Password")]
         public required string Passwd { get; set; }
         public string Role { get; set; } = "User";
+
+        //public ICollection<Product> Favourites { get; set; }
 }
 
 }

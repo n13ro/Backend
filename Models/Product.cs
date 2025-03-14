@@ -11,5 +11,7 @@ namespace backend.Models
         public required decimal Price { get; set; }
         
         public required ICollection<string> Size { get; set; }
+
+        public long Quantity { get; set; } = 0;
     }
 }
