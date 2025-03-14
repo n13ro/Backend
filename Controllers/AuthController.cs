@@ -45,8 +45,9 @@ namespace backend.Controllers
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
 
-            var token = _jwtService.GenerateToken(user);
-            return new AuthResponseDto { Token = token };
+            //var token = _jwtService.GenerateToken(user);
+            //return new AuthResponseDto { Token = token };
+            return Ok(new { mess = "User is created" });
             }
 
         [HttpPost("login")]
