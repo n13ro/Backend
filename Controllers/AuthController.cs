@@ -4,6 +4,7 @@ using System.Text;
 using backend.Database;
 using backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using static Backend.DTOs.AuthDto;
 
@@ -11,6 +12,7 @@ namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowedHosts")]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -27,7 +29,7 @@ namespace backend.Controllers
             return Convert.ToBase64String(hashedBytesSha256);
         }
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponseDto>> Register([FromForm]RegisterDto registerDto)
+        public async Task<ActionResult<AuthResponseDto>> Register([FromBody]RegisterDto registerDto)
         {
             if (_dbContext.Users.Any(u => u.Email == registerDto.Email))
             {
@@ -48,7 +50,7 @@ namespace backend.Controllers
             }
 
         [HttpPost("login")]
-        public ActionResult<AuthResponseDto> Login([FromForm]LoginDto loginDto)
+        public ActionResult<AuthResponseDto> Login([FromBody] LoginDto loginDto)
         {
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
             var hPs = HashPasswd(loginDto.Password);

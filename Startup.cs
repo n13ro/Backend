@@ -1,5 +1,4 @@
 ﻿using backend.Database;
-using static Backend.DTOs.AuthDto;
 
 namespace Backend;
 
@@ -16,12 +15,12 @@ public class Startup
         });
         services.AddCors(options =>
         {
-            
-            options.AddPolicy(name: "AllowAllOrigins",
-                              builder =>
-                              {
-                                  builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                              });
+
+            options.AddPolicy(name: "AllowedHosts",
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                      });
         });
     }
 
@@ -31,7 +30,7 @@ public class Startup
         {
             app.UseDeveloperExceptionPage();
         }
-
+        app.UseCors("AllowedHosts");
         app.UseRouting();
         app.UseEndpoints(endpoints =>
         {

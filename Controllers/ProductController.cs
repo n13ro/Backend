@@ -3,6 +3,7 @@ using backend.Database;
 using backend.Models;
 using Backend.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowedHosts")]
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -54,7 +56,7 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromForm] ProdDto prodDto )
+        public async Task<IActionResult> CreateProduct([FromBody] ProdDto prodDto )
         {
             try
             {
