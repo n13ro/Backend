@@ -54,6 +54,7 @@ namespace backend.Controllers
             return Ok(productResponse);
         }
 
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] ProdDto prodDto )

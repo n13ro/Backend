@@ -19,7 +19,7 @@ namespace backend.Models
         public required string Passwd { get; set; }
         public string Role { get; set; } = "User";
 
-        //public ICollection<Product> Favourites { get; set; }
+        public List<Product> Products { get; set; } = new List<Product>();
 }
 
 }

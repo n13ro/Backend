@@ -13,5 +13,7 @@ namespace backend.Models
         public required ICollection<string> Size { get; set; }
 
         public long Quantity { get; set; } = 0;
+
+        public List<User> Users { get; set; } = new List<User>();
     }
 }

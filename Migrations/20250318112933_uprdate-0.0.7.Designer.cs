@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Database;
@@ -11,9 +12,11 @@ using backend.Database;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250318112933_uprdate-0.0.7")]
+    partial class uprdate007
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,15 +27,15 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("ProductUser", b =>
                 {
-                    b.Property<Guid>("ProductsProductId")
+                    b.Property<Guid>("FavouritesProductId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("UsersId")
+                    b.Property<Guid>("FavouritesProductProductId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("ProductsProductId", "UsersId");
+                    b.HasKey("FavouritesProductId", "FavouritesProductProductId");
 
-                    b.HasIndex("UsersId");
+                    b.HasIndex("FavouritesProductProductId");
 
                     b.ToTable("ProductUser");
                 });
@@ -94,15 +97,15 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("ProductUser", b =>
                 {
-                    b.HasOne("backend.Models.Product", null)
+                    b.HasOne("backend.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("ProductsProductId")
+                        .HasForeignKey("FavouritesProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("backend.Models.User", null)
+                    b.HasOne("backend.Models.Product", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("FavouritesProductProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

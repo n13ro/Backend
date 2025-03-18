@@ -15,5 +15,6 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasIndex(e => e.Email).IsUnique();
+        modelBuilder.Entity<User>().HasMany(e => e.Products).WithMany(e => e.Users);
     }
 }
