@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Backend.Swagger;
+using IdentityServer4.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,7 @@ builder.Services.AddCors(options => {
                       });
 });
 // Настраиваем аутентификацию
-builder.Services.AddAuthentication(x => 
+builder.Services.AddAuthentication(x =>
     {
         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -52,11 +53,19 @@ builder.Services.AddAuthentication(x =>
 
         };
     });
+    //.AddGoogle(options =>
+    //{
+    //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    //    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    //    options.Scope.Add("email");
+    //    options.Scope.Add("profile");
+    //});
 builder.Services.AddAuthorizationBuilder();
 //builder.Services.AddAuthorizationBuilder()
 //    .AddPolicy(IdentityData.AdminUserPolicyName, p => p.RequireClaim(IdentityData.AdminUserClaimName, "true"));
 
 var app = builder.Build();
+
 app.UseCors("AllowedHosts");
 
 // Configure the HTTP request pipeline.
@@ -67,6 +76,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
 app.UseAuthentication();
 app.UseAuthorization();
     
