@@ -18,7 +18,7 @@ namespace backend.Controllers
 
         public ProductController(AppDbContext dbContext) => _dbContext = dbContext;
 
-        [HttpGet]
+        [HttpGet("getAll")]
         public async Task<IEnumerable<Product>> GetAllProducts()
         {
             var allProd = await _dbContext.Products.ToListAsync();
@@ -32,16 +32,19 @@ namespace backend.Controllers
                 Size = [..product.Size],
                
             }).ToList();
-            
+            GC.Collect();
             return productResponses;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("getById")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
             var product = await _dbContext.Products
                 .FirstAsync(p => p.ProductId == id);
-
+            if (product == null)
+            {
+                return NotFound(new { mess = "Такого товара нет" });
+            }
             var productResponse = new Product
             {
                 ProductId = product.ProductId,
@@ -50,13 +53,13 @@ namespace backend.Controllers
                 Price = product.Price,
                 Size = [..product.Size],
             };
-
+            GC.Collect();
             return Ok(productResponse);
         }
 
 
         [Authorize(Roles = "Admin")]
-        [HttpPost]
+        [HttpPost("createProd")]
         public async Task<IActionResult> CreateProduct([FromBody] ProdDto prodDto )
         {
             try
@@ -72,7 +75,7 @@ namespace backend.Controllers
 
                 _dbContext.Products.Add(newProduct);
                 await _dbContext.SaveChangesAsync();
-
+                GC.Collect();
                 return Ok(new { mess = "Товар создан" });
             }
             catch (UnauthorizedAccessException ex)
@@ -86,11 +89,20 @@ namespace backend.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public async Task DeleteProduct(Guid id)
+        [HttpDelete("delById")]
+        public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            await _dbContext.Products.Where(x => x.ProductId == id).ExecuteDeleteAsync();
+            var product = await _dbContext.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id);
 
+            if(product == null)
+            {
+                return NotFound(new { mess = "Продукта нет" });
+            }
+            _dbContext.Products.Remove(product);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { mess = "Продукт удален!"});
         }
 
     }

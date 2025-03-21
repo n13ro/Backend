@@ -47,6 +47,7 @@ namespace backend.Controllers
 
             //var token = _jwtService.GenerateToken(user);
             //return new AuthResponseDto { Token = token };
+            GC.Collect();
             return Ok(new { mess = "User is created" });
             }
 
@@ -63,6 +64,7 @@ namespace backend.Controllers
             var token = _jwtService.GenerateToken(user);
             
             return new AuthResponseDto { Token = token };
+
         }
 
 
