@@ -8,5 +8,5 @@ public class ProdDto
     public required decimal Price { get; set; }
     public required string[] Size { get; set; }
 
-    public long Quantity { get; set; } = 0;
+    public required long Quantity { get; set; }
 }

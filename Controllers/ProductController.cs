@@ -23,17 +23,17 @@ namespace backend.Controllers
         {
             var allProd = await _dbContext.Products.ToListAsync();
                 
-            var productResponses = allProd.Select(product => new Product
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Size = [..product.Size],
+            //var productResponses = allProd.Select(product => new Product
+            //{
+            //    ProductId = product.ProductId,
+            //    Name = product.Name,
+            //    Description = product.Description,
+            //    Price = product.Price,
+            //    Size = [..product.Size],
                
-            }).ToList();
+            //}).ToList();
             GC.Collect();
-            return productResponses;
+            return allProd;
         }
 
         [HttpGet("getById")]
@@ -45,16 +45,16 @@ namespace backend.Controllers
             {
                 return NotFound(new { mess = "Такого товара нет" });
             }
-            var productResponse = new Product
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Size = [..product.Size],
-            };
+            //var productResponse = new Product
+            //{
+            //    ProductId = product.ProductId,
+            //    Name = product.Name,
+            //    Description = product.Description,
+            //    Price = product.Price,
+            //    Size = [..product.Size],
+            //};
             GC.Collect();
-            return Ok(productResponse);
+            return Ok(product);
         }
 
 
@@ -71,6 +71,8 @@ namespace backend.Controllers
                     Description = prodDto.Desc,
                     Price = prodDto.Price,
                     Size = [.. prodDto.Size],
+                    Quantity = prodDto.Quantity,
+                    ArticleNumber = new Random().Next(1000000, 9999999)
                 };
 
                 _dbContext.Products.Add(newProduct);
@@ -81,6 +83,41 @@ namespace backend.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new { message = "Недостаточно прав для выполнения данной операции." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPut("editProd/{id}")]
+        public async Task<IActionResult> EditProduct(Guid id, [FromBody] ProdDto prodDto)
+        {
+            try
+            {
+                var productToUpdate = await _dbContext.Products.FindAsync(id);
+
+                if(productToUpdate == null)
+                {
+                    return NotFound(new { mess = "Продукта нет" });
+                }
+                productToUpdate.Name = prodDto.Name;
+                productToUpdate.Description = prodDto.Desc;
+                productToUpdate.Price = prodDto.Price;
+                productToUpdate.Quantity = prodDto.Quantity;
+                productToUpdate.Size = prodDto.Size;
+
+                await _dbContext.SaveChangesAsync();
+                GC.Collect();
+                return Ok(new { mess = "Товар изменен" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = "Недостаточно прав для выполнения данной операции." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest(new { message = "Ошибка обновления. Возможно, данные были изменены другим пользователем." });
             }
             catch (Exception ex)
             {
