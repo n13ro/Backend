@@ -22,9 +22,7 @@ namespace Backend.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Exp, DateTime.UtcNow.AddMinutes(10).ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, "login"),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Nickname, user.NickName),
                 new Claim(JwtRegisteredClaimNames.Name, user.FirstName),
@@ -32,7 +30,6 @@ namespace Backend.Services
                 new Claim(JwtRegisteredClaimNames.Address, user.Address),
                 //new Claim(JwtRegisteredClaimNames., user.),
 
-                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
             };
 
@@ -40,7 +37,7 @@ namespace Backend.Services
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: credentials
             );
 

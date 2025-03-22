@@ -22,16 +22,7 @@ namespace backend.Controllers
         public async Task<IEnumerable<Product>> GetAllProducts()
         {
             var allProd = await _dbContext.Products.ToListAsync();
-                
-            //var productResponses = allProd.Select(product => new Product
-            //{
-            //    ProductId = product.ProductId,
-            //    Name = product.Name,
-            //    Description = product.Description,
-            //    Price = product.Price,
-            //    Size = [..product.Size],
-               
-            //}).ToList();
+
             GC.Collect();
             return allProd;
         }
@@ -45,14 +36,6 @@ namespace backend.Controllers
             {
                 return NotFound(new { mess = "Такого товара нет" });
             }
-            //var productResponse = new Product
-            //{
-            //    ProductId = product.ProductId,
-            //    Name = product.Name,
-            //    Description = product.Description,
-            //    Price = product.Price,
-            //    Size = [..product.Size],
-            //};
             GC.Collect();
             return Ok(product);
         }
@@ -74,7 +57,7 @@ namespace backend.Controllers
                     Quantity = prodDto.Quantity,
                     ArticleNumber = new Random().Next(1000000, 9999999)
                 };
-
+                
                 _dbContext.Products.Add(newProduct);
                 await _dbContext.SaveChangesAsync();
                 GC.Collect();
@@ -138,7 +121,7 @@ namespace backend.Controllers
             }
             _dbContext.Products.Remove(product);
             await _dbContext.SaveChangesAsync();
-
+            GC.Collect();
             return Ok(new { mess = "Продукт удален!"});
         }
 

@@ -1,11 +1,15 @@
 ﻿
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using backend.Database;
 using backend.Models;
+using Backend.DTOs;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Backend.DTOs.AuthDto;
 
 namespace backend.Controllers
@@ -67,7 +71,72 @@ namespace backend.Controllers
 
         }
 
+        [Authorize]
+        [HttpPut("updateUser/{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody]UpdateUserDto updateUser)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+
+            if (currentUserId != id)
+            {
+                return Forbid();
+            }
+
+            var user = await _dbContext.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            bool state = false;
+
+            if (!string.IsNullOrWhiteSpace(updateUser.NickName))
+            {
+                user.NickName = updateUser.NickName;
+                state = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(updateUser.FirstName))
+            {
+                user.FirstName = updateUser.FirstName;
+                state = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(updateUser.SurName))
+            {
+                user.SurName = updateUser.SurName;
+                state = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(updateUser.Address))
+            {
+                user.Address = updateUser.Address;
+                state = true;
+            }
+
+            if (state)
+            {
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                    return Ok(new { mess = "Успешно!!!" });
+                }
+                catch (DbUpdateException ex)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { mess = "Произошла ошибка при изменении данных.", exception = ex.Message });
+                }
+            }
+
+            return NoContent();
+        }
 
     }
     
