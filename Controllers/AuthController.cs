@@ -138,6 +138,22 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        [Authorize]
+        [HttpDelete("deleteUser")]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            var user = await _dbContext.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound(new { mess = "Пользователя нет" });
+            }
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            GC.Collect();
+            return Ok(new { mess = "Пользователь удален!" });
+        } 
     }
     
 }
