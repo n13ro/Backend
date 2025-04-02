@@ -7,8 +7,6 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Backend.Swagger;
-using Minio;
-using Microsoft.OpenApi.Models;
 using static MinioService;
 
 
