@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace backend.Models
+namespace Backend.Models
 {
     public class Product
     {
@@ -15,6 +15,6 @@ namespace backend.Models
 
         public long Quantity { get; set; }
 
-        //public List<User> Users { get; set; } = new List<User>();
+        public ICollection<string> ImageUrl { get; set; }
     }
 }

@@ -1,10 +1,12 @@
-﻿using backend.Database;
+﻿using Backend.Database;
+using Microsoft.Extensions.DependencyInjection;
+using System.Configuration;
 
 namespace Backend;
 
 public class Startup
 {
-    public void ConfigureServices(IServiceCollection services)
+    public void ConfigureServices(IServiceCollection services)  
     {
         services.AddDbContext<AppDbContext>();
         services.AddControllers();
@@ -12,6 +14,10 @@ public class Startup
         {
             options.Cookie.HttpOnly = true;
             options.ExpireTimeSpan = TimeSpan.FromDays(30); 
+        });
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title ="backend first big proj", Version = "v1" });
         });
         services.AddCors(options =>
         {
@@ -22,6 +28,7 @@ public class Startup
                           policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                       });
         });
+        
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

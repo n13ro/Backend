@@ -1,13 +1,16 @@
 ﻿
-using backend.Database;
-using backend.Models;
+using Backend.Database;
+using Backend.Models;
 using Backend.DTOs;
+//using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Backend.Services;
+using static System.Net.Mime.MediaTypeNames;
 
-namespace backend.Controllers
+namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -15,8 +18,13 @@ namespace backend.Controllers
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
+        private readonly MinioService _minioService;
 
-        public ProductController(AppDbContext dbContext) => _dbContext = dbContext;
+        public ProductController(AppDbContext dbContext, MinioService minioService)
+        {
+            _dbContext = dbContext;
+            _minioService = minioService;
+        }
 
         [HttpGet("getAll")]
         public async Task<IEnumerable<Product>> GetAllProducts()
@@ -43,10 +51,61 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("createProd")]
-        public async Task<IActionResult> CreateProduct([FromBody] ProdDto prodDto )
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateProduct([FromForm] ProdDto prodDto, List<IFormFile> images)
         {
             try
             {
+                // Проверка наличия файла
+                if (images == null || !images.Any())
+                {
+                    return BadRequest(new { message = "Изображение обязательно" });
+                }
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+                // Проверка типа файла
+                foreach (var image in images)
+                {
+                    if (!allowedTypes.Contains(image.ContentType.ToLower()))
+                    {
+                        return BadRequest(new { message = "Допустимы только изображения форматов: JPEG, PNG, GIF, WEBP" });
+                    }
+
+                    if (image.Length > 10 * 1024 * 1024) // 10MB
+                    {
+                        return BadRequest(new { message = $"Размер файла {image.FileName} не должен превышать 5 МБ" });
+                    }
+                }
+
+                var imageUrls = new List<string>();
+
+                foreach (var image in images)
+                {
+                    try
+                    {
+                        string imageUrl = await _minioService.UploadFileAsync(image);
+                        imageUrls.Add(imageUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        BadRequest(new { mess = $"Ошибка при загрузке изображения {image.FileName}" });
+
+                        // Удаляем уже загруженные изображения в случае ошибки
+                        foreach (var url in imageUrls)
+                        {
+                            try
+                            {
+                                // Извлекаем имя файла из URL
+                                Uri uri = new Uri(url);
+                                string fileName = uri.Segments.Last();
+                                await _minioService.DeleteFileAsync(fileName);
+                            }
+                            catch { /* Игнорируем ошибки при удалении */ }
+                        }
+
+                        return StatusCode(500, new { message = $"Ошибка при загрузке изображения: {ex.Message}" });
+                    }
+                }
+
                 var newProduct = new Product
                 {
                     ProductId = Guid.NewGuid(),
@@ -55,7 +114,8 @@ namespace backend.Controllers
                     Price = prodDto.Price,
                     Size = [.. prodDto.Size],
                     Quantity = prodDto.Quantity,
-                    ArticleNumber = new Random().Next(1000000, 9999999)
+                    ArticleNumber = new Random().Next(1000000, 9999999),
+                    ImageUrl = imageUrls
                 };
                 
                 _dbContext.Products.Add(newProduct);
@@ -69,6 +129,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
+                
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }

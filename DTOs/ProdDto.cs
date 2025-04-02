@@ -1,12 +1,23 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace Backend.DTOs;
 
 public class ProdDto
 {
+    [Required(ErrorMessage = "Название товара обязательно")]
     public required string Name { get; set; }
+    
+    [Required(ErrorMessage = "Описание товара обязательно")]
     public required string Desc { get; set; }
-    public required decimal Price { get; set; }
-    public required string[] Size { get; set; }
 
-    public required long Quantity { get; set; }
+    [Required(ErrorMessage = "Цена товара обязательна")]
+    public decimal Price { get; set; }
+
+    [Required(ErrorMessage = "Размер товара обязателен")]
+    public string[] Size { get; set; }
+
+    [Required(ErrorMessage = "Количество товара обязательно")]
+    public long Quantity { get; set; }
+
 }

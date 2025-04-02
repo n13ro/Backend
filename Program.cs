@@ -1,4 +1,4 @@
-using backend.Database;
+using Backend.Database;
 using Backend.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -7,6 +7,9 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Backend.Swagger;
+using Minio;
+using Microsoft.OpenApi.Models;
+using static MinioService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +25,16 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 {
     optionsBuilder.UseNpgsql(builder.Configuration["ConnectionStrings:DbConnectionString"]!);
 });
-// Регистрируем сервис JWT
+
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("MinioSettings"));
+builder.Services.AddSingleton(sp => 
+{
+    var settings = sp.GetRequiredService<IOptions<MinioSettings>>().Value;
+    return settings;
+});
+builder.Services.AddSingleton<MinioService>();
+
+
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddCors(options => {
     options.AddPolicy(name: "AllowedHosts",
@@ -31,7 +43,7 @@ builder.Services.AddCors(options => {
                           policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                       });
 });
-// Настраиваем аутентификацию
+
 builder.Services.AddAuthentication(x =>
     {
         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,7 +68,6 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddAuthorizationBuilder();
 
-
 var app = builder.Build();
 
 app.UseCors("AllowedHosts");
@@ -74,7 +85,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
     
-
 app.MapControllers();
 
 app.Run();
