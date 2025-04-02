@@ -14,7 +14,7 @@ namespace Backend.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(User user)
+        public string GenerateToken(User user, bool rememberMe = false)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
@@ -28,16 +28,24 @@ namespace Backend.Services
                 new Claim(JwtRegisteredClaimNames.Name, user.FirstName),
                 new Claim(JwtRegisteredClaimNames.FamilyName, user.SurName),
                 new Claim(JwtRegisteredClaimNames.Address, user.Address),
-                //new Claim(JwtRegisteredClaimNames., user.),
-
                 new Claim(ClaimTypes.Role, user.Role),
             };
+
+            DateTime expiration;
+
+            if(rememberMe)
+            {
+                expiration = DateTime.UtcNow.AddDays(30);
+            } 
+            else{
+                expiration = DateTime.UtcNow.AddMinutes(10);
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
+                expires: expiration,
                 signingCredentials: credentials
             );
 

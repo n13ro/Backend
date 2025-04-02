@@ -60,12 +60,13 @@ namespace Backend.Controllers
         {
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
             var hPs = HashPasswd(loginDto.Password);
+
             if (user == null || !(user.Passwd == hPs))
             {
                 return Unauthorized(new { mess = "Invalid credentials" });
             }
 
-            var token = _jwtService.GenerateToken(user);
+            var token = _jwtService.GenerateToken(user, loginDto.RememberMe);
             
             return new AuthResponseDto { Token = token };
 
