@@ -52,18 +52,18 @@ namespace Backend.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost("createProd")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> CreateProduct([FromForm] ProdDto prodDto, List<IFormFile> images)
+        public async Task<IActionResult> CreateProduct([FromForm] ProdDto prodDto)
         {
             try
             {
                 // Проверка наличия файла
-                if (images == null || !images.Any())
+                if (prodDto.images == null || !prodDto.images.Any())
                 {
                     return BadRequest(new { message = "Изображение обязательно" });
                 }
                 var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
                 // Проверка типа файла
-                foreach (var image in images)
+                foreach (var image in prodDto.images)
                 {
                     if (!allowedTypes.Contains(image.ContentType.ToLower()))
                     {
@@ -78,7 +78,7 @@ namespace Backend.Controllers
 
                 var imageUrls = new List<string>();
 
-                foreach (var image in images)
+                foreach (var image in prodDto.images)
                 {
                     try
                     {
@@ -116,7 +116,7 @@ namespace Backend.Controllers
                     Quantity = prodDto.Quantity,
                     ArticleNumber = new Random().Next(1000000, 9999999),
                     ImageUrl = imageUrls
-                };
+                    };
                 
                 _dbContext.Products.Add(newProduct);
                 await _dbContext.SaveChangesAsync();

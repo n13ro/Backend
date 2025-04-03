@@ -20,4 +20,6 @@ public class ProdDto
     [Required(ErrorMessage = "Количество товара обязательно")]
     public long Quantity { get; set; }
 
+    public List<IFormFile> images {get; set;}
+
 }
