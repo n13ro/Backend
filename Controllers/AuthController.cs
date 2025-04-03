@@ -1,5 +1,4 @@
-﻿
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Backend.Database;
@@ -44,6 +43,9 @@ namespace Backend.Controllers
             {
                 Email = registerDto.Email,
                 Passwd = HashPasswd(registerDto.Password),
+                NickName = registerDto.NickName,
+                FirstName = registerDto.FirstName,
+                SurName = registerDto.SurName,
             };
 
             _dbContext.Users.Add(user);
