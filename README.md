@@ -1,4 +1,4 @@
-<h1>Рабочий backend на c#/.NET</h1>
+<h1>Рабочий backend на c#/.NET(Дописывается)</h1>
 
 <p><b>.NET 8.0:</b> Проект создан с использованием .NET 8.0</p>
 
@@ -17,60 +17,7 @@
 - Создание, изменение, удаление продкута только для Админа
 ---
 - Так же планируется другой функционал, о нем потом))
-```
-Backend/
-    │
-    ├───Controllers/
-    │   ├───AuthController.cs
-    │   └───ProductController.cs
-    │
-    ├───DTOs/
-    │   ├───AuthDto.cs
-    │   ├───ProdDto.cs
-    │   └───UpdateUserDto.cs
-    │
-    ├───Database/
-    │   └───AppDbContext.cs
-    │
-    ├───Identity/
-    │   └───IdentityData.cs
-    │
-    ├───Migrations/
-    │   ├───20230101000000_InitialCreate.cs
-    │   └───20230101000000_InitialCreate.Designer.cs
-    │
-    ├───Models/
-    │   ├───Image.cs
-    │   ├───Product.cs
-    │   └───User.cs
-    │
-    ├───Properties/
-    │   └───launchSettings.json
-    │
-    ├───Services/
-    │   └───JwtService.cs
-    │
-    ├───Swagger/
-    │   └───ConfigureSwaggerOptions.cs
-    │
-    │───Utils/..
-    │   Backend.sln
-    │   Backend.csproj
-    │───appsettings.Development.json
-    └───appsettings.json
-```
-
-## Обязательно
-
-Перед запуском заполнить в `appsettings.json`
-
-Эту строчку `"DbConnectionString": "Host=localhost;Port=Port;Database=DatabaseName;Username=postgres;Password=Password"`
-
-<h3>Запуск проекта:</h3>
-
-Для запуска проекта в `Visual Studio` просто нажмите кнопку http/https/IIS Express ![image](https://github.com/user-attachments/assets/43bd3748-01cc-4ef3-a269-92513c94d7f0)
-
-
+---
 ### Иначе, если вы делаете через консоль
 
 - Откройте каталог MerchMarket в терминале или командной строке
