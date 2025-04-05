@@ -1,4 +1,5 @@
 ﻿using Castle.Components.DictionaryAdapter;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOs
@@ -34,6 +35,7 @@ namespace Backend.DTOs
             public required string Email { get; set; }
             [Required]
             [DataType(DataType.Password)]
+            [MinLength(8, ErrorMessage = "Пароль должен быть больше 8 символов")]
             public required string Password { get; set; }
             
             public bool RememberMe { get; set; }

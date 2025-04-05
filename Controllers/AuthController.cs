@@ -31,8 +31,9 @@ namespace Backend.Controllers
             var hashedBytesSha256 = SHA256.HashData(Encoding.UTF8.GetBytes(str));
             return Convert.ToBase64String(hashedBytesSha256);
         }
+
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponseDto>> Register([FromBody]RegisterDto registerDto)
+        public async Task<ActionResult> Register([FromBody]RegisterDto registerDto)
         {
             if (_dbContext.Users.Any(u => u.Email == registerDto.Email))
             {
@@ -51,27 +52,29 @@ namespace Backend.Controllers
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
 
-            //var token = _jwtService.GenerateToken(user);
-            //return new AuthResponseDto { Token = token };
-            GC.Collect();
             return Ok(new { mess = "User is created" });
-            }
+        }
 
         [HttpPost("login")]
         public ActionResult<AuthResponseDto> Login([FromBody] LoginDto loginDto)
         {
+            // Поиск пользователя по email
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
+            
+            // Хеширование введенного пароля для сравнения
             var hPs = HashPasswd(loginDto.Password);
 
+            // Проверка учетных данных
             if (user == null || !(user.Passwd == hPs))
             {
                 return Unauthorized(new { mess = "Invalid credentials" });
             }
 
+            // Генерация JWT токена
             var token = _jwtService.GenerateToken(user, loginDto.RememberMe);
             
+            // Возвращаем токен клиенту
             return new AuthResponseDto { Token = token };
-
         }
 
         [Authorize]
