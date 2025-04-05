@@ -25,7 +25,7 @@ namespace Backend.Controllers
             _dbContext = dbContext;
             _jwtService = jwtService;
         }
-        
+
         private static string HashPasswd(string str)
         {
             var hashedBytesSha256 = SHA256.HashData(Encoding.UTF8.GetBytes(str));
@@ -33,7 +33,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody]RegisterDto registerDto)
+        public async Task<ActionResult<AuthResponseDto>> Register([FromBody]RegisterDto registerDto)
         {
             if (_dbContext.Users.Any(u => u.Email == registerDto.Email))
             {
@@ -51,8 +51,12 @@ namespace Backend.Controllers
 
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
+            // Генерация JWT токена
+            var token = _jwtService.GenerateToken(user);
 
-            return Ok(new { mess = "User is created" });
+            // Возвращаем токен клиенту
+            return new AuthResponseDto { Token = token };
+            //return Ok(new { mess = "User is created" });
         }
 
         [HttpPost("login")]

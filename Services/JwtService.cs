@@ -33,12 +33,12 @@ namespace Backend.Services
 
             DateTime expiration;
 
-            if(rememberMe)
+            if(rememberMe == true)
             {
                 expiration = DateTime.UtcNow.AddDays(30);
             } 
             else{
-                expiration = DateTime.UtcNow.AddMinutes(10);
+                expiration = DateTime.UtcNow.AddHours(2);
             }
 
             var token = new JwtSecurityToken(
