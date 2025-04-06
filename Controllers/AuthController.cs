@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 using static Backend.DTOs.AuthDto;
 
 namespace Backend.Controllers
@@ -20,6 +22,10 @@ namespace Backend.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly JwtService _jwtService;
+        
+        // Использование словаря для хранения refresh токенов в памяти (userId -> refreshToken)
+        private static readonly HashSet<(Guid userId, string token)> _refreshTokens = new();
+        
         public AuthController(AppDbContext dbContext, JwtService jwtService)
         {
             _dbContext = dbContext;
@@ -33,7 +39,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponseDto>> Register([FromBody]RegisterDto registerDto)
+        public async Task<ActionResult<TokenResponse>> Register([FromBody]RegisterDto registerDto)
         {
             if (_dbContext.Users.Any(u => u.Email == registerDto.Email))
             {
@@ -51,16 +57,24 @@ namespace Backend.Controllers
 
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
-            // Генерация JWT токена
-            var token = _jwtService.GenerateToken(user);
-
-            // Возвращаем токен клиенту
-            return new AuthResponseDto { Token = token };
-            //return Ok(new { mess = "User is created" });
+            
+            // Генерация access токена
+            var accessToken = _jwtService.GenerateToken(user);
+            
+            // Генерация refresh токена
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            _refreshTokens.Add((user.Id, refreshToken));
+            
+            // Возвращаем оба токена
+            return new TokenResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
         }
 
         [HttpPost("login")]
-        public ActionResult<AuthResponseDto> Login([FromBody] LoginDto loginDto)
+        public ActionResult<TokenResponse> Login([FromBody] LoginDto loginDto)
         {
             // Поиск пользователя по email
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
@@ -74,11 +88,99 @@ namespace Backend.Controllers
                 return Unauthorized(new { mess = "Invalid credentials" });
             }
 
-            // Генерация JWT токена
-            var token = _jwtService.GenerateToken(user, loginDto.RememberMe);
+            // Генерация access токена
+            var accessToken = _jwtService.GenerateToken(user, loginDto.RememberMe);
             
-            // Возвращаем токен клиенту
-            return new AuthResponseDto { Token = token };
+            // Генерация refresh токена
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            _refreshTokens.Add((user.Id, refreshToken));
+            
+            // Возвращаем оба токена
+            return new TokenResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
+        [Authorize]
+        [HttpPost("refresh")]
+        public ActionResult<TokenResponse> Refresh([FromBody] RefreshTokenRequest request)
+        {
+            // Проверяем, что refresh токен не пустой
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return BadRequest(new { message = "Refresh токен не может быть пустым" });
+            }
+            
+            // Получаем access токен из заголовка Authorization
+            var accessToken = HttpContext.Request.Headers["Authorization"]
+                .FirstOrDefault()?
+                .Replace("Bearer ", "")
+                .Trim();
+            
+            // Проверяем, что access токен предоставлен
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return BadRequest(new { message = "Необходимо предоставить Access токен в заголовке Authorization" });
+            }
+            
+            try
+            {
+                // Извлекаем информацию из существующего токена, даже если он истек
+                var principal = _jwtService.GetPrincipalFromExpiredToken(accessToken);
+                
+                // Получаем ID пользователя из токена
+                var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return BadRequest(new { message = "Невозможно определить пользователя из токена" });
+                }
+                var userId = Guid.Parse(userIdClaim.Value);
+                
+                // Проверяем, что у нас есть сохраненный refresh токен для этого пользователя
+                var storedToken = _refreshTokens.FirstOrDefault(t => t.userId == userId);
+                if (storedToken == default)
+                {
+                    return BadRequest(new { message = "Refresh токен не найден" });
+                }
+                
+                if (storedToken.token != request.RefreshToken)
+                {
+                    return BadRequest(new { message = "Недействительный refresh токен" });
+                }
+                
+                // Находим пользователя в базе данных
+                var user = _dbContext.Users.Find(userId);
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Пользователь не найден" });
+                }
+                
+                // Получаем настройку "запомнить меня" из исходного токена
+                var rememberMe = principal.Claims
+                    .FirstOrDefault(c => c.Type == "RememberMe")?.Value == "true";
+                
+                // Создаем новый access токен
+                var newAccessToken = _jwtService.GenerateToken(user, rememberMe);
+                
+                // Создаем новый refresh токен
+                var newRefreshToken = _jwtService.GenerateRefreshToken();
+                
+                // Сохраняем новый refresh токен
+                _refreshTokens.RemoveWhere(t => t.userId == userId);
+                _refreshTokens.Add((userId, newRefreshToken));
+                
+                // Возвращаем новую пару токенов
+                return new TokenResponse
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Ошибка при обработке токена", error = ex.Message });
+            }
         }
 
         [Authorize]
@@ -165,5 +267,4 @@ namespace Backend.Controllers
             return Ok(new { mess = "Пользователь удален!" });
         } 
     }
-    
 }
