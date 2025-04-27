@@ -18,13 +18,6 @@ public class MinioService
 
     public MinioService(MinioSettings settings, ILogger<MinioService> logger, IConfiguration configuration)
     {
-        //_minioClient = new MinioClient()
-        //    .WithEndpoint(settings.Endpoint)
-        //    .WithCredentials(settings.AccessKey, settings.SecretKey)
-        //    .WithSSL(false)
-        //    .Build();
-        //_bucketName = settings.BucketName;
-        //_endpoint = settings.Endpoint;
         _endpoint = configuration["MinioSettings:Endpoint"];
         var accessKey = configuration["MinioSettings:AccessKey"];
         var secretKey = configuration["MinioSettings:SecretKey"];
@@ -50,30 +43,6 @@ public class MinioService
         {
             bool found = await _minioClient.BucketExistsAsync(new BucketExistsArgs()
                 .WithBucket(_bucketName));
-                
-            //if (!found)
-            //{
-            //    _logger.LogInformation($"Creating bucket {_bucketName}");
-            //    await _minioClient.MakeBucketAsync(new MakeBucketArgs()
-            //        .WithBucket(_bucketName));
-                    
-            //    // Устанавливаем публичный доступ для чтения
-            //    string policy = @"{
-            //        ""Version"": ""2012-10-17"",
-            //        ""Statement"": [
-            //            {
-            //                ""Effect"": ""Allow"",
-            //                ""Principal"": { ""AWS"": [""*""] },
-            //                ""Action"": [""s3:GetObject""],
-            //                ""Resource"": [""arn:aws:s3:::" + _bucketName + @"/*""]
-            //            }
-            //        ]
-            //    }";
-                
-            //    await _minioClient.SetPolicyAsync(new SetPolicyArgs()
-            //        .WithBucket(_bucketName)
-            //        .WithPolicy(policy));
-            //}
                 // Генерируем уникальное имя файла
             string fileName = $"{_mkdirProd}/{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 

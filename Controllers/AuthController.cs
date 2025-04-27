@@ -56,7 +56,6 @@ namespace Backend.Controllers
 
             // Возвращаем токен клиенту
             return new AuthResponseDto { Token = token };
-            //return Ok(new { mess = "User is created" });
         }
 
         [HttpPost("login")]

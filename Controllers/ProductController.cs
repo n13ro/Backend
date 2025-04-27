@@ -2,13 +2,11 @@
 using Backend.Database;
 using Backend.Models;
 using Backend.DTOs;
-//using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Backend.Services;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace Backend.Controllers
 {
@@ -133,9 +131,11 @@ namespace Backend.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+
         [Authorize(Roles = "Admin")]
         [HttpPut("editProd/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id, [FromBody] ProdDto prodDto)
+        public async Task<IActionResult> EditProduct(Guid id, [FromBody] string Name, string Desc, decimal Price, long Quantity, string[] Size)
         {
             try
             {
@@ -145,11 +145,11 @@ namespace Backend.Controllers
                 {
                     return NotFound(new { mess = "Продукта нет" });
                 }
-                productToUpdate.Name = prodDto.Name;
-                productToUpdate.Description = prodDto.Desc;
-                productToUpdate.Price = prodDto.Price;
-                productToUpdate.Quantity = prodDto.Quantity;
-                productToUpdate.Size = prodDto.Size;
+                productToUpdate.Name = Name;
+                productToUpdate.Description = Desc;
+                productToUpdate.Price = Price;
+                productToUpdate.Quantity = Quantity;
+                productToUpdate.Size = Size;
 
                 await _dbContext.SaveChangesAsync();
                 GC.Collect();
