@@ -1,12 +1,10 @@
-﻿
-using Backend.Database;
+﻿using Backend.Database;
 using Backend.Models;
 using Backend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Backend.Controllers
 {
@@ -45,7 +43,6 @@ namespace Backend.Controllers
             GC.Collect();
             return Ok(product);
         }
-
 
         [Authorize(Roles = "Admin")]
         [HttpPost("createProd")]
@@ -114,7 +111,7 @@ namespace Backend.Controllers
                     Quantity = prodDto.Quantity,
                     ArticleNumber = new Random().Next(1000000, 9999999),
                     ImageUrl = imageUrls
-                    };
+                };
                 
                 _dbContext.Products.Add(newProduct);
                 await _dbContext.SaveChangesAsync();
@@ -135,27 +132,55 @@ namespace Backend.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("editProd/{id}")]
-        public async Task<IActionResult> EditProduct(Guid id, [FromBody] string Name, string Desc, decimal Price, long Quantity, string[] Size)
+        public async Task<IActionResult> EditProduct(Guid id, [FromBody] UpdateProductDto dto)
         {
             try
             {
                 var productToUpdate = await _dbContext.Products.FindAsync(id);
 
-                if(productToUpdate == null)
+                if (productToUpdate == null)
                 {
                     return NotFound(new { mess = "Продукта нет" });
                 }
-                productToUpdate.Name = Name;
-                productToUpdate.Description = Desc;
-                productToUpdate.Price = Price;
-                productToUpdate.Quantity = Quantity;
-                productToUpdate.Size = Size;
+
+                bool changed = false;
+
+                if (dto.Name != null && dto.Name != productToUpdate.Name)
+                {
+                    productToUpdate.Name = dto.Name;
+                    changed = true;
+                }
+                if (dto.Desc != null && dto.Desc != productToUpdate.Description)
+                {
+                    productToUpdate.Description = dto.Desc;
+                    changed = true;
+                }
+                if (dto.Price.HasValue && dto.Price.Value != productToUpdate.Price)
+                {
+                    productToUpdate.Price = dto.Price.Value;
+                    changed = true;
+                }
+                if (dto.Quantity.HasValue && dto.Quantity.Value != productToUpdate.Quantity)
+                {
+                    productToUpdate.Quantity = dto.Quantity.Value;
+                    changed = true;
+                }
+                if (dto.Size != null && !dto.Size.SequenceEqual(productToUpdate.Size))
+                {
+                    productToUpdate.Size = dto.Size;
+                    changed = true;
+                }
+
+                if (!changed)
+                {
+                    return Ok(new { mess = "Нет изменений" });
+                }
 
                 await _dbContext.SaveChangesAsync();
                 GC.Collect();
                 return Ok(new { mess = "Товар изменен" });
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Unauthorized(new { message = "Недостаточно прав для выполнения данной операции." });
             }
@@ -185,6 +210,5 @@ namespace Backend.Controllers
             GC.Collect();
             return Ok(new { mess = "Продукт удален!"});
         }
-
     }
 }
